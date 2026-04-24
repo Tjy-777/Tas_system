@@ -1,0 +1,14 @@
+CREATE TABLE products (
+    item_code VARCHAR(20) PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    kana VARCHAR(50) NOT NULL,
+    price INT NOT NULL,
+    category VARCHAR(20) NOT NULL
+);
+
+-- テスト用のデータをいくつか入れておきます
+INSERT INTO products (item_code, name, kana, price, category) VALUES
+('101', '商品1', 'ｼｮｳﾋﾝ1', 115, '野菜'),
+('102', '商品2', 'ｼｮｳﾋﾝ2', 130, '野菜'),
+('105', '商品5', 'ｼｮｳﾋﾝ5', 175, '肉・魚'),
+('109', '商品9', 'ｼｮｳﾋﾝ9', 235, '飲料');

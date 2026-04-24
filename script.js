@@ -1,27 +1,19 @@
-// --- 1. データベースから商品を取得 (変更部分) ---
-let products = {}; // 空にしておく
+// --- 1. データベースから商品を取得 ---
+let products = {};
 
-// --- 1. 簡易データベース ---
-const products = {};
-const categories = ["野菜", "肉・魚", "飲料", "その他"];
-
-// PHPから商品データを取得して、商品ボタンを生成する
+// ページ読み込み時にPHP経由でMySQLから商品データを取得
 async function fetchProducts() {
     try {
-        const response = await fetch('api_products.php'); // PHPを呼び出す
-        products = await response.json(); // MySQLのデータが入る
-        
-        // （※元々あった商品ボタンを生成する関数をここで呼ぶ）
-        initItemGrid(); 
+        const response = await fetch('api_products.php');
+        products = await response.json();
+        console.log("商品データを読み込みました:", products);
     } catch (error) {
         console.error("商品データの読み込みに失敗しました:", error);
-        alert("サーバー通信エラーです。");
+        alert("データベースに接続できません。ローカルサーバーとMySQLが起動しているか確認してください。");
     }
 }
 
-// 〜〜〜 中略（元々の cart などのコードはそのまま） 〜〜〜
-
-// 一番下など、スクリプトが読み込まれた時に実行
+// スクリプト読み込み時にすぐデータ取得を開始する
 fetchProducts();
 
 // --- 2. 状態管理 ---
@@ -34,16 +26,40 @@ const viewCode = document.getElementById('view-code');
 const btnModeSingle = document.getElementById('btn-mode-single');
 const btnModeCode = document.getElementById('btn-mode-code');
 
-// --- 4. 初期化処理（ログイン情報の復元） ---
-window.addEventListener('DOMContentLoaded', () => {
-    const savedId = localStorage.getItem('pos_clerk_id');
-    if (!savedId) {
-        // IDがなければログイン画面へ戻す
-        window.location.href = 'login.html';
-        return;
-    }
-    document.getElementById('clerk-label').textContent = `担当: ${savedId}`;
+// --- 4. ログイン機能 (IME対応 ＆ Enterキー対応) ---
+const empIdInput = document.getElementById('emp-id');
+let isComposing = false;
+
+if (empIdInput) {
+    const formatEmpId = () => {
+        let value = empIdInput.value;
+        value = value.replace(/[Ａ-Ｚａ-ｚ０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0));
+        value = value.replace(/[^a-zA-Z0-9]/g, '');
+        if (empIdInput.value !== value) empIdInput.value = value;
+    };
+    empIdInput.addEventListener('compositionstart', () => { isComposing = true; });
+    empIdInput.addEventListener('compositionend', () => { isComposing = false; formatEmpId(); });
+    empIdInput.addEventListener('input', () => { if (!isComposing) formatEmpId(); });
+}
+
+document.getElementById('btn-login').addEventListener('click', () => {
+    const id = document.getElementById('emp-id').value || "12345";
+    document.getElementById('clerk-label').textContent = `担当: ${id}`;
+    document.getElementById('login-screen').classList.add('hidden');
+    document.getElementById('pos-screen').classList.remove('hidden');
+    
+    // ログインしたタイミングで画面に商品ボタンを生成
     initItemGrid();
+});
+
+document.addEventListener('keydown', (e) => {
+    const loginScreen = document.getElementById('login-screen');
+    if (loginScreen && !loginScreen.classList.contains('hidden')) {
+        if (e.key === 'Enter' && !isComposing) {
+            e.preventDefault(); 
+            document.getElementById('btn-login').click();
+        }
+    }
 });
 
 // --- 5. モード切替 ---
@@ -67,6 +83,8 @@ btnModeCode.addEventListener('click', () => {
 function initItemGrid() {
     const grid = document.getElementById('item-grid');
     grid.innerHTML = "";
+    
+    // データベースから取得した products を展開
     Object.keys(products).forEach(code => {
         const p = products[code];
         const btn = document.createElement('div');
@@ -99,10 +117,7 @@ catBtns.forEach(btn => {
 // --- 8. カート・UI更新 ---
 function addToCart(code) {
     const p = products[code];
-    if (!p) {
-        alert("登録がありません");
-        return;
-    }
+    if (!p) return alert("登録がありません");
 
     const exist = cart.find(i => i.id === code);
     if (exist) { exist.qty++; } 
@@ -124,7 +139,7 @@ function updateUI(lastItem) {
         row.innerHTML = `
             <div class="top"><span>${item.name}</span><span>¥${sub.toLocaleString()}</span></div>
             <div class="bottom">
-                <span>￥${item.price.toLocaleString()}</span>
+                <span>@${item.price.toLocaleString()}</span>
                 <div>
                     <button class="qty-btn" onclick="changeQty('${item.id}', -1)">-</button>
                     ${item.qty}
