@@ -1,90 +1,72 @@
 // --- 1. データベースから商品を取得 ---
 let products = {};
 
-// ページ読み込み時にPHP経由でMySQLから商品データを取得
 async function fetchProducts() {
     try {
         const response = await fetch('api_products.php');
         products = await response.json();
         console.log("商品データを読み込みました:", products);
+        // 商品一覧を表示する場所があれば初期化
+        if (document.getElementById('item-grid')) {
+            initItemGrid();
+        }
     } catch (error) {
         console.error("商品データの読み込みに失敗しました:", error);
-        alert("データベースに接続できません。ローカルサーバーとMySQLが起動しているか確認してください。");
     }
 }
-
-// スクリプト読み込み時にすぐデータ取得を開始する
 fetchProducts();
 
 // --- 2. 状態管理 ---
 let cart = [];
 let calcInput = "";
 
-// --- 3. 要素の取得 ---
-const viewSingle = document.getElementById('view-single');
-const viewCode = document.getElementById('view-code');
-const btnModeSingle = document.getElementById('btn-mode-single');
-const btnModeCode = document.getElementById('btn-mode-code');
-
-// --- 4. ログイン機能 (IME対応 ＆ Enterキー対応) ---
+// --- 3. ログイン・担当者表示機能 ---
+// ログイン画面（index.html）用の処理
+const btnLogin = document.getElementById('btn-login');
 const empIdInput = document.getElementById('emp-id');
-let isComposing = false;
 
-if (empIdInput) {
-    const formatEmpId = () => {
-        let value = empIdInput.value;
-        value = value.replace(/[Ａ-Ｚａ-ｚ０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0));
-        value = value.replace(/[^a-zA-Z0-9]/g, '');
-        if (empIdInput.value !== value) empIdInput.value = value;
+if (btnLogin && empIdInput) {
+    btnLogin.onclick = () => {
+        const id = empIdInput.value || "12345";
+        localStorage.setItem('pos_clerk_id', id);
+        window.location.href = 'Tas.html';
     };
-    empIdInput.addEventListener('compositionstart', () => { isComposing = true; });
-    empIdInput.addEventListener('compositionend', () => { isComposing = false; formatEmpId(); });
-    empIdInput.addEventListener('input', () => { if (!isComposing) formatEmpId(); });
 }
 
-document.getElementById('btn-login').addEventListener('click', () => {
-    const id = document.getElementById('emp-id').value || "12345";
-    document.getElementById('clerk-label').textContent = `担当: ${id}`;
-    document.getElementById('login-screen').classList.add('hidden');
-    document.getElementById('pos-screen').classList.remove('hidden');
-    
-    // ログインしたタイミングで画面に商品ボタンを生成
-    initItemGrid();
-});
+// レジ画面（Tas.html）用の担当者表示
+const clerkLabel = document.getElementById('clerk-label');
+if (clerkLabel) {
+    clerkLabel.textContent = `担当: ${localStorage.getItem('pos_clerk_id') || "----"}`;
+}
 
-document.addEventListener('keydown', (e) => {
-    const loginScreen = document.getElementById('login-screen');
-    if (loginScreen && !loginScreen.classList.contains('hidden')) {
-        if (e.key === 'Enter' && !isComposing) {
-            e.preventDefault(); 
-            document.getElementById('btn-login').click();
-        }
-    }
-});
+// --- 4. モード切替（単品 / コード入力） ---
+const btnModeSingle = document.getElementById('btn-mode-single');
+const btnModeCode = document.getElementById('btn-mode-code');
+const viewSingle = document.getElementById('view-single');
+const viewCode = document.getElementById('view-code');
 
-// --- 5. モード切替 ---
-btnModeSingle.addEventListener('click', () => {
-    btnModeSingle.classList.add('active');
-    btnModeCode.classList.remove('active');
-    viewSingle.classList.remove('hidden');
-    viewCode.classList.add('hidden');
-});
+if (btnModeSingle && btnModeCode) {
+    btnModeSingle.onclick = () => {
+        btnModeSingle.classList.add('active');
+        btnModeCode.classList.remove('active');
+        viewSingle.classList.remove('hidden');
+        viewCode.classList.add('hidden');
+    };
+    btnModeCode.onclick = () => {
+        btnModeCode.classList.add('active');
+        btnModeSingle.classList.remove('active');
+        viewCode.classList.remove('hidden');
+        viewSingle.classList.add('hidden');
+        calcInput = "";
+        updateCalcDisplay();
+    };
+}
 
-btnModeCode.addEventListener('click', () => {
-    btnModeCode.classList.add('active');
-    btnModeSingle.classList.remove('active');
-    viewCode.classList.remove('hidden');
-    viewSingle.classList.add('hidden');
-    calcInput = "";
-    updateCalcDisplay();
-});
-
-// --- 6. 商品ボタン生成 ---
+// --- 5. 商品ボタン生成 ---
 function initItemGrid() {
     const grid = document.getElementById('item-grid');
+    if (!grid) return;
     grid.innerHTML = "";
-    
-    // データベースから取得した products を展開
     Object.keys(products).forEach(code => {
         const p = products[code];
         const btn = document.createElement('div');
@@ -96,38 +78,33 @@ function initItemGrid() {
     });
 }
 
-// --- 7. カテゴリタブ切り替え ---
-const catBtns = document.querySelectorAll('.cat-btn');
-catBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-        catBtns.forEach(b => b.classList.remove('active'));
+// --- 6. カテゴリ切り替え ---
+document.querySelectorAll('.cat-btn').forEach(btn => {
+    btn.onclick = () => {
+        document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-        const targetCategory = btn.dataset.category;
-        const items = document.querySelectorAll('#item-grid .grid-item');
-        items.forEach(item => {
-            if (targetCategory === "すべて" || item.dataset.category === targetCategory) {
-                item.style.display = '';
-            } else {
-                item.style.display = 'none';
-            }
+        const target = btn.dataset.category;
+        document.querySelectorAll('.grid-item').forEach(item => {
+            item.style.display = (target === "すべて" || item.dataset.category === target) ? '' : 'none';
         });
-    });
+    };
 });
 
-// --- 8. カート・UI更新 ---
+// --- 7. カート処理 ---
 function addToCart(code) {
     const p = products[code];
-    if (!p) return alert("登録がありません");
-
+    if (!p) {
+        alert("商品コード " + code + " は登録されていません");
+        return;
+    }
     const exist = cart.find(i => i.id === code);
-    if (exist) { exist.qty++; } 
-    else { cart.push({ id: code, ...p, qty: 1 }); }
-
+    if (exist) { exist.qty++; } else { cart.push({ id: code, ...p, qty: 1 }); }
     updateUI(p);
 }
 
 function updateUI(lastItem) {
     const list = document.getElementById('receipt-list');
+    if (!list) return;
     list.innerHTML = "";
     let total = 0;
 
@@ -150,12 +127,10 @@ function updateUI(lastItem) {
     });
 
     document.getElementById('total-price').textContent = total.toLocaleString();
-    
     if (lastItem) {
         document.getElementById('target-item-name').textContent = lastItem.kana;
         document.getElementById('target-item-price').textContent = `￥${lastItem.price.toLocaleString()}`;
     }
-    list.scrollTop = list.scrollHeight;
 }
 
 window.changeQty = (id, delta) => {
@@ -167,7 +142,7 @@ window.changeQty = (id, delta) => {
     }
 };
 
-// --- 9. 電卓ロジック ---
+// --- 8. 電卓ロジック ---
 document.querySelectorAll('.num').forEach(b => {
     b.onclick = () => {
         if (calcInput.length < 13) {
@@ -177,38 +152,54 @@ document.querySelectorAll('.num').forEach(b => {
     };
 });
 
-document.getElementById('btn-calc-del').onclick = () => {
-    calcInput = calcInput.slice(0, -1);
-    updateCalcDisplay();
-};
-
-document.getElementById('btn-calc-enter').onclick = () => {
-    if (calcInput) {
-        addToCart(calcInput);
-        calcInput = "";
+const btnDel = document.getElementById('btn-calc-del');
+if (btnDel) {
+    btnDel.onclick = () => {
+        calcInput = calcInput.slice(0, -1);
         updateCalcDisplay();
-    }
-};
-
-function updateCalcDisplay() {
-    document.getElementById('calc-display').textContent = calcInput;
+    };
 }
 
-// --- 10. フッターボタン ---
-document.getElementById('btn-clear-all').onclick = () => {
-    if (confirm("全消去しますか？")) { 
-        cart = []; 
-        updateUI(); 
-        document.getElementById('target-item-name').textContent = "ｲﾗｯｼｬｲﾏｾ";
-        document.getElementById('target-item-price').textContent = "";
-    }
-};
+const btnEnter = document.getElementById('btn-calc-enter');
+if (btnEnter) {
+    btnEnter.onclick = () => {
+        if (calcInput) {
+            addToCart(calcInput);
+            calcInput = "";
+            updateCalcDisplay();
+        }
+    };
+}
 
-document.getElementById('btn-checkout').onclick = () => {
-    if (cart.length === 0) return;
-    alert("お会計完了");
-    cart = [];
-    updateUI();
-    document.getElementById('target-item-name').textContent = "ｱﾘｶﾞﾄｳｺﾞｻﾞｲﾏｼﾀ";
-    document.getElementById('target-item-price').textContent = "";
-};
+function updateCalcDisplay() {
+    const display = document.getElementById('calc-display');
+    if (display) display.textContent = calcInput;
+}
+
+// --- 9. フッターボタン（全消去・会計） ---
+const btnClear = document.getElementById('btn-clear-all');
+if (btnClear) {
+    btnClear.onclick = () => {
+        if (confirm("レシートをすべて消去しますか？")) { 
+            cart = []; 
+            updateUI(); 
+            document.getElementById('target-item-name').textContent = "ｲﾗｯｼｬｲﾏｾ";
+            document.getElementById('target-item-price').textContent = "";
+        }
+    };
+}
+
+const btnCheckout = document.getElementById('btn-checkout');
+if (btnCheckout) {
+    btnCheckout.onclick = () => {
+        if (cart.length === 0) {
+            alert("カートが空です");
+            return;
+        }
+        alert("お会計が完了しました！");
+        cart = [];
+        updateUI();
+        document.getElementById('target-item-name').textContent = "ｱﾘｶﾞﾄｳｺﾞｻﾞｲﾏｼﾀ";
+        document.getElementById('target-item-price').textContent = "";
+    };
+}
