@@ -134,7 +134,7 @@ function updateUI(lastItem) {
         row.innerHTML = `
             <div class="top"><span>${item.name}</span><span>¥${sub.toLocaleString()}</span></div>
             <div class="bottom">
-                <span>@${item.price.toLocaleString()}</span>
+                <span>￥${item.price.toLocaleString()}</span>
                 <div>
                     <button class="qty-btn" onclick="changeQty('${item.id}', -1)">-</button>
                     ${item.qty}
