@@ -1,5 +1,11 @@
+<<<<<<< HEAD
 // --- 1. データベースから商品を取得 (変更部分) ---
 let products = {}; // 空にしておく
+=======
+// --- 1. 簡易データベース ---
+const products = {};
+const categories = ["野菜", "肉・魚", "飲料", "その他"];
+>>>>>>> e3b5cf01f776d083496e6148786c3083ab5245e5
 
 // PHPから商品データを取得して、商品ボタンを生成する
 async function fetchProducts() {
@@ -30,41 +36,16 @@ const viewCode = document.getElementById('view-code');
 const btnModeSingle = document.getElementById('btn-mode-single');
 const btnModeCode = document.getElementById('btn-mode-code');
 
-// --- 4. ログイン機能 (IME対応 ＆ Enterキー対応) ---
-const empIdInput = document.getElementById('emp-id');
-let isComposing = false;
-
-// 全角を半角英数字に変換する処理
-if (empIdInput) {
-    const formatEmpId = () => {
-        let value = empIdInput.value;
-        value = value.replace(/[Ａ-Ｚａ-ｚ０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0));
-        value = value.replace(/[^a-zA-Z0-9]/g, '');
-        if (empIdInput.value !== value) empIdInput.value = value;
-    };
-    empIdInput.addEventListener('compositionstart', () => { isComposing = true; });
-    empIdInput.addEventListener('compositionend', () => { isComposing = false; formatEmpId(); });
-    empIdInput.addEventListener('input', () => { if (!isComposing) formatEmpId(); });
-}
-
-// ログインボタンを押したときの処理
-document.getElementById('btn-login').addEventListener('click', () => {
-    const id = document.getElementById('emp-id').value || "12345";
-    document.getElementById('clerk-label').textContent = `担当: ${id}`;
-    document.getElementById('login-screen').classList.add('hidden');
-    document.getElementById('pos-screen').classList.remove('hidden');
-    initItemGrid();
-});
-
-// 画面全体でEnterキーを監視（ログイン画面ならログイン実行）
-document.addEventListener('keydown', (e) => {
-    const loginScreen = document.getElementById('login-screen');
-    if (loginScreen && !loginScreen.classList.contains('hidden')) {
-        if (e.key === 'Enter' && !isComposing) {
-            e.preventDefault(); 
-            document.getElementById('btn-login').click();
-        }
+// --- 4. 初期化処理（ログイン情報の復元） ---
+window.addEventListener('DOMContentLoaded', () => {
+    const savedId = localStorage.getItem('pos_clerk_id');
+    if (!savedId) {
+        // IDがなければログイン画面へ戻す
+        window.location.href = 'login.html';
+        return;
     }
+    document.getElementById('clerk-label').textContent = `担当: ${savedId}`;
+    initItemGrid();
 });
 
 // --- 5. モード切替 ---
@@ -120,7 +101,10 @@ catBtns.forEach(btn => {
 // --- 8. カート・UI更新 ---
 function addToCart(code) {
     const p = products[code];
-    if (!p) return alert("登録がありません");
+    if (!p) {
+        alert("登録がありません");
+        return;
+    }
 
     const exist = cart.find(i => i.id === code);
     if (exist) { exist.qty++; } 
@@ -154,7 +138,6 @@ function updateUI(lastItem) {
 
     document.getElementById('total-price').textContent = total.toLocaleString();
     
-    // お客様ディスプレイの更新
     if (lastItem) {
         document.getElementById('target-item-name').textContent = lastItem.kana;
         document.getElementById('target-item-price').textContent = `￥${lastItem.price.toLocaleString()}`;
@@ -203,8 +186,6 @@ document.getElementById('btn-clear-all').onclick = () => {
     if (confirm("全消去しますか？")) { 
         cart = []; 
         updateUI(); 
-        
-        // お客様用画面もリセット
         document.getElementById('target-item-name').textContent = "ｲﾗｯｼｬｲﾏｾ";
         document.getElementById('target-item-price').textContent = "";
     }
@@ -215,9 +196,6 @@ document.getElementById('btn-checkout').onclick = () => {
     alert("お会計完了");
     cart = [];
     updateUI();
-    
-    // お客様用画面もリセット
     document.getElementById('target-item-name').textContent = "ｱﾘｶﾞﾄｳｺﾞｻﾞｲﾏｼﾀ";
     document.getElementById('target-item-price').textContent = "";
 };
-

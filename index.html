@@ -3,15 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>スーパーPOSシステム - 画面遷移版</title>
+    <title>Tasシステム - ログイン</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
     <div id="login-screen" class="screen">
         <div class="login-card">
             <div class="login-header">
-                <h1 class="brand-title">POS SYSTEM</h1>
+                <h1 class="brand-title">Tas SYSTEM</h1>
                 <p class="brand-subtitle">レジ・担当者登録</p>
             </div>
             
@@ -33,71 +32,34 @@
         </div>
     </div>
 
-    <div id="pos-screen" class="screen hidden">
-        
-        <header class="customer-display">
-            <div class="display-left">
-                <div id="clerk-label">担当: ----</div>
-                <div id="target-item-name">ｲﾗｯｼｬｲﾏｾ</div>
-            </div>
-            <div class="display-right">
-                <div id="target-item-price"></div>
-            </div>
-        </header>
+    <script>
+        const btnLogin = document.getElementById('btn-login');
+        const empIdInput = document.getElementById('emp-id');
 
-        <div class="main-container">
-            <aside class="receipt-pane">
-                <div class="receipt-list" id="receipt-list">
-                    </div>
-                <div class="receipt-total">
-                    <span class="label">合計(税込)</span>
-                    <span class="total-val">¥<span id="total-price">0</span></span>
-                </div>
-            </aside>
+        // ログイン処理
+        const login = () => {
+            const id = empIdInput.value || "12345";
+            // 担当者IDをブラウザに保存
+            localStorage.setItem('pos_clerk_id', id);
+            // レジ画面へ遷移
+            window.location.href = 'pos.html';
+        };
 
-            <main class="operation-panel">
-                
-                <div class="mode-selector">
-                    <button id="btn-mode-single" class="mode-btn active">単品</button>
-                    <button id="btn-mode-code" class="mode-btn">コードモード</button>
-                </div>
+        btnLogin.addEventListener('click', login);
 
-                <div class="view-stack">
-                    <div id="view-single" class="view">
-                        
-                        <div class="category-tabs" id="category-tabs">
-                            <button class="cat-btn active" data-category="すべて">すべて</button>
-                            <button class="cat-btn" data-category="野菜">野菜</button>
-                            <button class="cat-btn" data-category="肉・魚">肉・魚</button>
-                            <button class="cat-btn" data-category="飲料">飲料</button>
-                            <button class="cat-btn" data-category="その他">その他</button>
-                        </div>
-                        <div class="item-grid" id="item-grid">
-                            </div>
-                    </div>
+        // Enterキーでログイン
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                login();
+            }
+        });
 
-                    <div id="view-code" class="view hidden">
-                        <div class="calculator-container">
-                            <div class="calc-display" id="calc-display"></div>
-                            <div class="numpad">
-                                <button class="num">7</button><button class="num">8</button><button class="num">9</button>
-                                <button class="num">4</button><button class="num">5</button><button class="num">6</button>
-                                <button class="num">1</button><button class="num">2</button><button class="num">3</button>
-                                <button class="num">0</button><button class="num">00</button><button id="btn-calc-del">削除</button>
-                                <button id="btn-calc-enter" class="calc-enter">入力 / 確定</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bottom-actions">
-                    <button id="btn-clear-all" class="danger">全消去</button>
-                    <button id="btn-checkout" class="success">会 計</button>
-                </div>
-            </main>
-        </div>
-    </div>
-
-    <script src="script.js"></script>
+        // 全角数字を半角に変換する簡易処理（元のロジックを継承）
+        empIdInput.addEventListener('blur', () => {
+            let val = empIdInput.value;
+            val = val.replace(/[Ａ-Ｚａ-ｚ０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0));
+            empIdInput.value = val.replace(/[^a-zA-Z0-9]/g, '');
+        });
+    </script>
 </body>
 </html>
