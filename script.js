@@ -1,16 +1,24 @@
-// --- 1. 簡易データベース（カテゴリを自動割り振り） ---
-const products = {};
-const categories = ["野菜", "肉・魚", "飲料", "その他"];
+// --- 1. データベースから商品を取得 (変更部分) ---
+let products = {}; // 空にしておく
 
-for (let i = 1; i <= 16; i++) {
-    const catIndex = Math.floor((i - 1) / 4); 
-    products[`10${i}`] = { 
-        name: `商品${i}`, 
-        kana: `ｼｮｳﾋﾝ${i}`, 
-        price: 100 + (i * 15),
-        category: categories[catIndex]
-    };
+// PHPから商品データを取得して、商品ボタンを生成する
+async function fetchProducts() {
+    try {
+        const response = await fetch('api_products.php'); // PHPを呼び出す
+        products = await response.json(); // MySQLのデータが入る
+        
+        // （※元々あった商品ボタンを生成する関数をここで呼ぶ）
+        initItemGrid(); 
+    } catch (error) {
+        console.error("商品データの読み込みに失敗しました:", error);
+        alert("サーバー通信エラーです。");
+    }
 }
+
+// 〜〜〜 中略（元々の cart などのコードはそのまま） 〜〜〜
+
+// 一番下など、スクリプトが読み込まれた時に実行
+fetchProducts();
 
 // --- 2. 状態管理 ---
 let cart = [];
