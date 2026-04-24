@@ -48,6 +48,32 @@ document.getElementById('btn-login').addEventListener('click', () => {
     initItemGrid();
 });
 
+// --- Enterキーでのログイン実行 ---
+// （※empIdInput はすでにある「IME対応版」の変数を使用します）
+const empPassInput = document.getElementById('emp-pass');
+const btnLogin = document.getElementById('btn-login');
+
+// 社員番号の入力欄でEnterが押されたときの処理
+if (empIdInput) {
+    empIdInput.addEventListener('keydown', (e) => {
+        // 日本語入力の変換確定時のEnterは無視する
+        if (e.isComposing) return;
+        
+        if (e.key === 'Enter') {
+            btnLogin.click(); // ログインボタンを押したことにする
+        }
+    });
+}
+
+// パスワードの入力欄でEnterが押されたときの処理
+if (empPassInput) {
+    empPassInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            btnLogin.click(); // ログインボタンを押したことにする
+        }
+    });
+}
+
 // --- 2. 商品ボタン生成（カテゴリ情報を埋め込む） ---
 // 既存の initItemGrid() をこれに書き換えてください
 function initItemGrid() {
@@ -148,13 +174,25 @@ function updateCalcDisplay() {
 
 // --- フッターボタン ---
 document.getElementById('btn-clear-all').onclick = () => {
-    if (confirm("全消去しますか？")) { cart = []; updateUI(); }
+    if (confirm("全消去しますか？")) { 
+        cart = []; 
+        updateUI(); 
+        
+        // ▼▼▼ 追加：お客様用画面の表示を初期状態に戻す ▼▼▼
+        document.getElementById('target-item-name').textContent = "ｲﾗｯｼｬｲﾏｾ";
+        document.getElementById('target-item-price').textContent = "";
+    }
 };
+
 document.getElementById('btn-checkout').onclick = () => {
     if (cart.length === 0) return;
     alert("お会計完了");
     cart = [];
     updateUI();
+    
+    // ▼▼▼ 追加：お会計完了時もお客様用画面をリセットする ▼▼▼
+    document.getElementById('target-item-name').textContent = "ｱﾘｶﾞﾄｳｺﾞｻﾞｲﾏｼﾀ";
+    document.getElementById('target-item-price').textContent = "";
 };
 
 // --- 社員番号の入力制御 (IME対応版：全角英数字を半角にし、英数字のみ許可) ---
