@@ -1,11 +1,9 @@
-<<<<<<< HEAD
 // --- 1. データベースから商品を取得 (変更部分) ---
 let products = {}; // 空にしておく
-=======
+
 // --- 1. 簡易データベース ---
 const products = {};
 const categories = ["野菜", "肉・魚", "飲料", "その他"];
->>>>>>> e3b5cf01f776d083496e6148786c3083ab5245e5
 
 // PHPから商品データを取得して、商品ボタンを生成する
 async function fetchProducts() {
