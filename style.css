@@ -6,321 +6,228 @@
     --navy-dark: #1e293b;
     --blue-primary: #3b82f6;
     --white: #ffffff;
-    --border-color: #e2e8f0;
-    --bg-gray: #f8fafc;
+    --border-color: #cbd5e1;
     --success: #10b981;
     --danger: #ef4444;
-    --warning: #f59e0b;
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: sans-serif; height: 100vh; overflow: hidden; }
-.hidden { display: none !important; }
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
 
-/* 既存の画面用スタイル */
-#login-screen { display: flex; justify-content: center; align-items: center; background: var(--bg-gradient); height: 100vh; }
-.login-card { background: #ffffff; width: 480px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); overflow: hidden; }
-.login-header { background: var(--navy-dark); color: #ffffff; padding: 35px 20px; text-align: center; }
-.login-body { padding: 40px; text-align: center; }
-
-#pos-screen { background: var(--bg-gradient); height: 100vh; display: flex; flex-direction: column; }
-.customer-display { background: #000; height: 100px; padding: 0 30px; display: flex; align-items: center; justify-content: space-between; color: #0f0; }
-
-.main-container { flex: 1; display: flex; padding: 20px; gap: 20px; overflow: hidden; }
-.receipt-pane { width: 400px; background: var(--white); border-radius: 16px; display: flex; flex-direction: column; overflow: hidden; }
-.receipt-list { flex: 1; overflow-y: auto; padding: 20px; }
-.receipt-item { border-bottom: 1px solid var(--border-color); padding: 15px 0; }
-.receipt-item .top { display: flex; justify-content: space-between; font-weight: bold; }
+body {
+    font-family: 'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif;
+    height: 100vh;
+    overflow: hidden;
+    background: var(--bg-gradient);
+}
 
 /* ==============================
-   決済画面 (checkout.html) 専用スタイル
+   メインレジ画面 (Tas.html)
    ============================== */
-.checkout-body {
-    background-color: #f1f5f9;
+#pos-screen {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
-.checkout-header {
-    background-color: var(--navy-dark);
-    color: #ffffff;
-    padding: 15px 30px;
+.customer-display {
+    background: #000;
+    height: 100px;
+    padding: 0 30px;
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-between;
+    color: #0f0;
+    font-family: monospace;
+    font-size: 1.8rem;
 }
 
-.back-btn {
-    background: transparent;
-    border: 1px solid #94a3b8;
-    color: white;
-    padding: 8px 15px;
-    border-radius: 8px;
-    cursor: pointer;
-}
-
-.checkout-container {
+.main-container {
+    flex: 1;
     display: flex;
-    height: calc(100vh - 70px);
-    padding: 25px;
-    gap: 25px;
+    padding: 20px;
+    gap: 20px;
+    overflow: hidden; /* はみ出し防止 */
 }
 
-/* 左側：商品リストと合計 */
-.checkout-receipt-pane {
-    width: 450px;
-    background-color: #ffffff;
+/* --- 左側：レシート表示 (幅を大きく固定) --- */
+.receipt-pane {
+    width: 600px !important;
+    min-width: 600px !important;
+    flex: 0 0 600px !important; 
+    background: var(--white);
     border-radius: 20px;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    border: 1px solid #ccc; /* ラフ案に合わせた枠線 */
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
 }
 
-/* 商品一行のスタイル */
-.checkout-receipt-pane .receipt-item {
-    padding: 15px 20px;
-    border-bottom: 1px solid #eee;
-}
-
-.checkout-receipt-pane .receipt-item .top {
-    display: flex;
-    justify-content: space-between;
-    font-weight: bold;
-    margin-bottom: 5px;
-}
-
-.checkout-receipt-pane .receipt-item .bottom {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    color: #666;
-    font-size: 0.9rem;
-}
-
-.receipt-header {
-    padding: 20px;
-    font-weight: bold;
-    border-bottom: 1px solid #ccc;
-}
-
-.checkout-total {
-    padding: 30px 20px;
-    background-color: #ffffff;
-    border: 1px solid #ccc;
-    margin: 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.total-amount {
-    font-size: 2.5rem;
-    font-weight: bold;
-}
-
-/* 右側：支払いボタン */
-.payment-methods-pane {
+.receipt-list {
     flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    overflow-y: auto;
+    padding: 10px;
 }
 
-.section-title {
-    font-size: 2rem;
-    margin-bottom: 30px;
-    color: #333;
+.receipt-item {
+    border-bottom: 2px solid #f1f5f9;
+    padding: 20px 15px;
 }
 
-.payment-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 300px);
-    grid-template-rows: repeat(2, 200px);
-    gap: 30px;
-}
-
-.pay-btn {
-    background: #f0f0f0;
-    border: 1px solid #333;
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.8rem;
-    font-weight: bold;
-}
-
-.pay-btn:hover {
-    background: #e0e0e0;
-}
-
-/* 数量調整ボタンのスタイル */
-.qty-control {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 1.2rem;
-}
-
-/* 数量ボタンの見た目を Tas.html と合わせる */
-.qty-btn {
-    width: 30px;
-    height: 30px;
-    border: 1px solid #ccc;
-    background: #fff;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.qty-control button {
-    padding: 5px 10px;
-    cursor: pointer;
-}
-
-/* --- checkout.html 用の追加スタイル --- */
-
-/* 左側のレシートアイテムの体裁を整える */
-.checkout-receipt-pane .receipt-item {
-    padding: 15px 20px;
-    border-bottom: 1px solid #eee;
-}
-
-.checkout-receipt-pane .receipt-item .top {
+.receipt-item .top {
     display: flex;
     justify-content: space-between;
-    font-weight: bold;
-    margin-bottom: 5px;
-}
-
-.checkout-receipt-pane .receipt-item .bottom {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    color: #666;
-    font-size: 0.9rem;
-}
-
-/* 数量ボタン */
-.qty-btn {
-    width: 32px;
-    height: 32px;
-    border: 1px solid #333;
-    background: #fff;
-    cursor: pointer;
-    font-weight: bold;
-}
-
-/* 現金支払い画面のレイアウト (スクリーンショット再現) */
-.cash-input-container {
-    width: 100%;
-    max-width: 700px;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 100px; /* 上下の要素の間隔 */
-}
-
-.change-display {
-    background: #f8fafc;
-    border: 1px solid #333;
-    padding: 40px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 2.2rem;
-}
-
-.cash-actions {
-    display: flex;
-    gap: 40px;
-    justify-content: center;
-}
-
-.cash-actions .pay-btn {
-    width: 280px;
-    height: 140px;
-    background: #eee;
-    border: 1px solid #333;
+    font-weight: 900;
     font-size: 1.6rem;
+    margin-bottom: 8px;
+}
+
+.receipt-item .bottom {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 4px;
-    flex-direction: row; /* アイコンを横並びにするなら */
+    justify-content: space-between;
+    font-size: 1.2rem;
+    color: #334155;
 }
 
-.cash-actions .pay-btn:hover {
-    background: #e2e8f0;
-}
-
-/* --- 現金決済・テンキーのデザイン --- */
-.cash-calc-container {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    width: 100%;
-    max-width: 500px;
-}
-
-.cash-display-area {
-    background: #fff;
-    border: 1px solid #333;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.input-line, .change-line {
+.receipt-total {
+    padding: 30px 20px;
+    background: #f8fafc;
+    border-top: 4px solid var(--navy-dark);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 1.5rem;
-    font-weight: bold;
 }
 
-.cash-input-window, .change-window {
-    border: 1px solid #333;
-    padding: 5px 15px;
-    min-width: 200px;
-    text-align: right;
-    background: #f8f8f8;
+.total-val {
+    font-size: 4rem;
+    font-weight: 900;
+    color: var(--navy-dark);
 }
 
-/* テンキーのグリッド */
-.numpad {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
+/* --- 右側：操作パネル --- */
+.operation-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    min-width: 0;
+}
+
+.mode-selector {
+    display: flex;
     gap: 10px;
 }
 
-.numpad .num {
-    height: 70px;
-    font-size: 1.8rem;
-    background: #eee;
-    border: 1px solid #333;
-    cursor: pointer;
-    font-weight: bold;
-}
-
-.numpad .num.del { background: #fca5a5; } /* 消去は薄い赤 */
-.numpad .num.enter { background: #93c5fd; } /* 決定は薄い青 */
-
-.cash-footer-actions {
-    display: flex;
-    gap: 20px;
-    margin-top: 20px;
-}
-
-.action-btn {
+.mode-btn {
     flex: 1;
-    height: 100px;
-    font-size: 1.4rem;
+    padding: 15px;
     font-weight: bold;
-    border: 1px solid #333;
+    font-size: 1.2rem;
+    cursor: pointer;
+    border-radius: 10px;
+    border: 2px solid var(--navy-dark);
+    background: #fff;
+}
+
+.mode-btn.active {
+    background: var(--navy-dark);
+    color: #fff;
+}
+
+/* --- 商品分類（カテゴリー）タブ --- */
+.category-tabs {
+    display: flex;
+    flex-wrap: wrap; /* ボタンが多い時に折り返す */
+    gap: 10px;
+    margin-bottom: 15px;
+    padding: 5px;
+}
+
+.cat-btn {
+    padding: 10px 20px;
+    border-radius: 25px;
+    border: 1px solid #cbd5e1;
+    background: #fff;
+    font-weight: bold;
     cursor: pointer;
 }
 
-.action-btn.back { background: #eee; }
-.action-btn.finish { background: #86efac; } /* 完了ボタン */
-.action-btn.disabled { background: #ccc; cursor: not-allowed; opacity: 0.6; }
+.cat-btn.active {
+    background: var(--blue-primary);
+    color: white;
+    border-color: var(--blue-primary);
+}
+
+/* --- 商品ボタングリッド --- */
+.view-stack {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.4);
+    border-radius: 20px;
+    padding: 15px;
+    overflow-y: auto;
+}
+
+.item-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 12px;
+}
+
+.grid-item {
+    aspect-ratio: 1 / 0.8;
+    background: #fff;
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.1rem;
+    padding: 10px;
+    text-align: center;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.grid-item:active {
+    transform: scale(0.95);
+    background: #f1f5f9;
+}
+
+/* --- 下部アクションボタン --- */
+.bottom-actions {
+    display: flex;
+    gap: 15px;
+    height: 90px;
+}
+
+.bottom-actions button {
+    flex: 1;
+    border-radius: 15px;
+    font-size: 1.6rem;
+    font-weight: bold;
+    cursor: pointer;
+    border: none;
+    color: white;
+}
+
+.bottom-actions .danger { background: var(--danger); }
+.bottom-actions .success { background: var(--success); }
+
+/* --- その他設定 --- */
+.hidden { display: none !important; }
+
+/* テンキー用 */
+.calculator-container { max-width: 400px; margin: 0 auto; }
+.calc-display {
+    background: #334155; color: #fff; height: 70px;
+    font-size: 2.5rem; text-align: right; padding: 10px 20px;
+    margin-bottom: 10px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: flex-end;
+}
+.numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.numpad button { height: 70px; font-size: 1.5rem; font-weight: bold; border-radius: 10px; border: 1px solid #ccc; background: #fff; cursor: pointer; }
+.calc-enter { grid-column: span 3; background: var(--blue-primary) !important; color: white !important; }
