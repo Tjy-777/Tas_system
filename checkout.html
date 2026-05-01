@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>決済 - Tasシステム</title>
-    <link rel="stylesheet" href="style.css?v=2">
+    <link rel="stylesheet" href="style.css?v=3">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body class="checkout-body">
@@ -51,96 +51,124 @@
 
         <main id="cash-payment-pane" class="payment-methods-pane hidden">
             <h2 class="section-title">現金お支払い</h2>
-            <div class="cash-input-container">
-                <div class="change-display">
-                    <span class="label">残り支払額:</span>
-                    <span class="amount"><span id="remaining-amount">0</span> 円</span>
+            
+            <div class="cash-calc-container">
+                <div class="cash-display-area">
+                    <div class="input-line">
+                        <span>お預かり額:</span>
+                        <div class="cash-input-window"><span id="cash-input-val">0</span>円</div>
+                    </div>
+                    <div class="change-line">
+                        <span>お釣り:</span>
+                        <div class="change-window"><span id="change-val">0</span>円</div>
+                    </div>
                 </div>
-                <div class="cash-actions">
-                    <button class="pay-btn back" onclick="showMethods()">
-                        <span>選択画面に戻る</span>
-                    </button>
-                    <button class="pay-btn success" onclick="finishPayment('現金')">
-                        <span>完 了</span>
-                    </button>
+
+                <div class="numpad">
+                    <button class="num" onclick="pressNum('7')">7</button>
+                    <button class="num" onclick="pressNum('8')">8</button>
+                    <button class="num" onclick="pressNum('9')">9</button>
+                    <button class="num" onclick="pressNum('4')">4</button>
+                    <button class="num" onclick="pressNum('5')">5</button>
+                    <button class="num" onclick="pressNum('6')">6</button>
+                    <button class="num" onclick="pressNum('1')">1</button>
+                    <button class="num" onclick="pressNum('2')">2</button>
+                    <button class="num" onclick="pressNum('3')">3</button>
+                    <button class="num" onclick="pressNum('0')">0</button>
+                    <button class="num" onclick="pressNum('00')">00</button>
+                    <button class="num del" onclick="pressClear()">消去</button>
+                    <button class="num enter" onclick="calculateChange()">決定</button>
+                </div>
+
+                <div class="cash-footer-actions">
+                    <button class="action-btn back" onclick="showMethods()">選択画面に戻る</button>
+                    <button id="btn-finish-cash" class="action-btn finish disabled" onclick="finishCashPayment()" disabled>完 了</button>
                 </div>
             </div>
         </main>
     </div>
 
     <script>
-        // カートデータの読み込み
         let checkoutCart = JSON.parse(sessionStorage.getItem('current_cart') || "[]");
-        
-        // 担当者の表示
-        const clerkId = localStorage.getItem('pos_clerk_id') || "----";
-        const label = document.getElementById('clerk-label-checkout');
-        if(label) label.textContent = `担当: ${clerkId}`;
+        let cashInput = ""; // 入力された数値文字列
+        let totalAmount = 0;
 
-        // 画面の更新
+        // 担当者表示
+        document.getElementById('clerk-label-checkout').textContent = `担当: ${localStorage.getItem('pos_clerk_id') || "----"}`;
+
         function updateCheckoutUI() {
             const list = document.getElementById('checkout-list');
             const totalDisp = document.getElementById('checkout-total-val');
-            if(!list || !totalDisp) return;
-
             list.innerHTML = "";
-            let total = 0;
+            totalAmount = 0;
 
             checkoutCart.forEach((item, index) => {
                 const sub = item.price * item.qty;
-                total += sub;
+                totalAmount += sub;
                 const row = document.createElement('div');
                 row.className = 'receipt-item';
-                row.innerHTML = `
-                    <div class="top">
-                        <span>${item.name}</span>
-                        <span>¥${sub.toLocaleString()}</span>
-                    </div>
-                    <div class="bottom">
-                        <span>@${item.price.toLocaleString()}</span>
-                        <div class="qty-control">
-                            <button class="qty-btn" onclick="changeQty(${index}, -1)">-</button>
-                            <span>${item.qty}</span>
-                            <button class="qty-btn" onclick="changeQty(${index}, 1)">+</button>
-                        </div>
-                    </div>`;
+                row.innerHTML = `<div class="top"><span>${item.name}</span><span>¥${sub.toLocaleString()}</span></div>
+                                 <div class="bottom"><span>@${item.price.toLocaleString()}</span><span>${item.qty}個</span></div>`;
                 list.appendChild(row);
             });
-            totalDisp.textContent = total.toLocaleString();
+            totalDisp.textContent = totalAmount.toLocaleString();
         }
 
-        // 画面切り替え：お支払い方法選択 → 現金入力画面
+        // 現金画面開始
         window.startCashPayment = () => {
             document.querySelector('.payment-methods-pane:not(#cash-payment-pane)').classList.add('hidden');
             document.getElementById('cash-payment-pane').classList.remove('hidden');
-            // 合計金額を「残り支払額」に反映
-            document.getElementById('remaining-amount').textContent = 
-                document.getElementById('checkout-total-val').textContent;
+            pressClear();
         };
 
-        // 画面切り替え：現金入力画面 → お支払い方法選択
         window.showMethods = () => {
             document.getElementById('cash-payment-pane').classList.add('hidden');
             document.querySelector('.payment-methods-pane:not(#cash-payment-pane)').classList.remove('hidden');
         };
 
-        // 数量変更
-        window.changeQty = (index, delta) => {
-            checkoutCart[index].qty += delta;
-            if (checkoutCart[index].qty <= 0) {
-                checkoutCart.splice(index, 1);
+        // テンキー操作
+        window.pressNum = (num) => {
+            if (cashInput.length < 10) {
+                cashInput += num;
+                document.getElementById('cash-input-val').textContent = Number(cashInput).toLocaleString();
             }
-            sessionStorage.setItem('current_cart', JSON.stringify(checkoutCart));
-            updateCheckoutUI();
-            
-            // 現金画面表示中に数量が変わった場合、残り支払額も更新
-            const remaining = document.getElementById('remaining-amount');
-            if (remaining) remaining.textContent = document.getElementById('checkout-total-val').textContent;
-
-            if (checkoutCart.length === 0) location.href = 'Tas.html';
         };
 
-        // 決済完了処理
+        window.pressClear = () => {
+            cashInput = "";
+            document.getElementById('cash-input-val').textContent = "0";
+            document.getElementById('change-val').textContent = "0";
+            document.getElementById('btn-finish-cash').classList.add('disabled');
+            document.getElementById('btn-finish-cash').disabled = true;
+        };
+
+        // お釣り計算
+        window.calculateChange = () => {
+            const paid = Number(cashInput);
+            const change = paid - totalAmount;
+            const changeDisp = document.getElementById('change-val');
+            const finishBtn = document.getElementById('btn-finish-cash');
+
+            changeDisp.textContent = change.toLocaleString();
+
+            if (change >= 0) {
+                changeDisp.style.color = "#000";
+                finishBtn.classList.remove('disabled');
+                finishBtn.disabled = false;
+            } else {
+                changeDisp.style.color = "red"; // 足りない場合は赤字
+                finishBtn.classList.add('disabled');
+                finishBtn.disabled = true;
+            }
+        };
+
+        window.finishCashPayment = () => {
+            const change = Number(cashInput) - totalAmount;
+            alert(`お会計完了\nお預かり: ${Number(cashInput).toLocaleString()}円\nお釣り: ${change.toLocaleString()}円`);
+            sessionStorage.removeItem('current_cart');
+            location.href = 'Tas.html';
+        };
+
         window.finishPayment = (method) => {
             alert(`${method}でお会計が完了しました。`);
             sessionStorage.removeItem('current_cart');
