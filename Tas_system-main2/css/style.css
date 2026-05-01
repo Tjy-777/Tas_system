@@ -1,0 +1,46 @@
+/* style.css (共通設定) */
+:root {
+    --bg-gradient: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+    --navy-dark: #1e293b;
+    --blue-primary: #3b82f6;
+    --white: #ffffff;
+    --border-color: #cbd5e1;
+    --success: #10b981;
+    --danger: #ef4444;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif;
+    height: 100vh;
+    overflow: hidden;
+    background: var(--bg-gradient);
+}
+
+.hidden { display: none !important; }
+
+/* 共通のレシートリスト構造（レジ・決済両方で使用） */
+.receipt-item {
+    border-bottom: 2px solid #f1f5f9;
+    padding: 20px 15px;
+}
+
+.receipt-item .top {
+    display: flex;
+    justify-content: space-between;
+    font-weight: 900;
+    font-size: 1.6rem;
+    margin-bottom: 8px;
+}
+
+.receipt-item .bottom {
+    display: flex;
+    justify-content: space-between;
+    font-size: 1.2rem;
+    color: #334155;
+}
