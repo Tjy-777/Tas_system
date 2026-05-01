@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>決済 - Tasシステム</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=2">
+</head>
+<body class="checkout-body">
+
+    <header class="checkout-header">
+        <button onclick="location.href='Tas.html'" class="back-btn">
+            <i class="fa-solid fa-arrow-left"></i> 戻る
+        </button>
+        <h1 class="header-title">お支払い</h1>
+        <div id="clerk-label-checkout">担当: ----</div>
+    </header>
+
+    <div class="checkout-container">
+        <aside class="checkout-receipt-pane">
+            <div class="receipt-header">選択中の商品</div>
+            <div id="checkout-list" class="receipt-list">
+                </div>
+            <div class="checkout-total">
+                <span class="total-label">合計：(税込み)</span>
+                <span class="total-amount">¥<span id="checkout-total-val">0</span></span>
+            </div>
+        </aside>
+
+        <main class="payment-methods-pane">
+            <h2 class="section-title">お支払方法を選択してください</h2>
+            <div class="payment-grid">
+                <button class="pay-btn cash" onclick="finishPayment('現金')">
+                    <i class="fa-solid fa-money-bill-1-wave"></i>
+                    <span>現 金</span>
+                </button>
+                <button class="pay-btn barcode" onclick="finishPayment('バーコード決済')">
+                    <i class="fa-solid fa-qrcode"></i>
+                    <span>バーコード決済</span>
+                </button>
+                <button class="pay-btn credit" onclick="finishPayment('クレジットカード')">
+                    <i class="fa-solid fa-credit-card"></i>
+                    <span>クレジットカード</span>
+                </button>
+                <button class="pay-btn electronic" onclick="finishPayment('電子マネー')">
+                    <i class="fa-solid fa-id-card"></i>
+                    <span>電子マネー</span>
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // カートデータの読み込み
+        let checkoutCart = JSON.parse(sessionStorage.getItem('current_cart') || "[]");
+        
+        // 担当者の表示
+        const clerkId = localStorage.getItem('pos_clerk_id') || "----";
+        const label = document.getElementById('clerk-label-checkout');
+        if(label) label.textContent = `担当: ${clerkId}`;
+
+        // 画面の更新
+        function updateCheckoutUI() {
+            const list = document.getElementById('checkout-list');
+            const totalDisp = document.getElementById('checkout-total-val');
+            if(!list || !totalDisp) return;
+
+            list.innerHTML = "";
+            let total = 0;
+
+            checkoutCart.forEach((item, index) => {
+                const sub = item.price * item.qty;
+                total += sub;
+                const row = document.createElement('div');
+                row.className = 'receipt-item';
+                row.innerHTML = `
+            <div class="top">
+                <span>${item.name}</span>
+                <span>¥${sub.toLocaleString()}</span>
+            </div>
+            <div class="bottom">
+                <span>@${item.price.toLocaleString()}</span>
+                <div class="qty-control">
+                    <button class="qty-btn" onclick="changeQty(${index}, -1)">-</button>
+                    <span>${item.qty}</span>
+                    <button class="qty-btn" onclick="changeQty(${index}, 1)">+</button>
+                </div>
+            </div>`;
+                list.appendChild(row);
+            });
+            totalDisp.textContent = total.toLocaleString();
+        }
+
+        // 数量変更
+        window.changeQty = (index, delta) => {
+            checkoutCart[index].qty += delta;
+            if (checkoutCart[index].qty <= 0) {
+                checkoutCart.splice(index, 1);
+            }
+            sessionStorage.setItem('current_cart', JSON.stringify(checkoutCart));
+            updateCheckoutUI();
+            if (checkoutCart.length === 0) location.href = 'Tas.html';
+        };
+
+        // 決済完了処理
+        window.finishPayment = (method) => {
+            alert(`${method}でお会計が完了しました。`);
+            sessionStorage.removeItem('current_cart');
+            location.href = 'Tas.html';
+        };
+
+        updateCheckoutUI();
+    </script>
+</body>
+</html>
