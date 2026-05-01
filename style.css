@@ -231,3 +231,155 @@ body {
 .numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 .numpad button { height: 70px; font-size: 1.5rem; font-weight: bold; border-radius: 10px; border: 1px solid #ccc; background: #fff; cursor: pointer; }
 .calc-enter { grid-column: span 3; background: var(--blue-primary) !important; color: white !important; }
+
+
+/* ==============================
+   決済画面 (checkout.html) 追加スタイル
+   ============================== */
+
+.checkout-body {
+    background: #f1f5f9;
+}
+
+.checkout-header {
+    background: var(--navy-dark);
+    color: white;
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.back-btn {
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.checkout-container {
+    display: flex;
+    height: calc(100vh - 70px);
+    padding: 20px;
+    gap: 20px;
+}
+
+/* 左側のレシート */
+.checkout-receipt-pane {
+    width: 400px;
+    background: white;
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.receipt-header {
+    padding: 15px;
+    background: #f8fafc;
+    border-bottom: 2px solid #e2e8f0;
+    font-weight: bold;
+}
+
+.checkout-total {
+    padding: 20px;
+    border-top: 2px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.total-amount {
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--danger);
+}
+
+/* 右側の支払い方法選択 */
+.payment-methods-pane {
+    flex: 1;
+    background: white;
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.section-title {
+    margin-bottom: 30px;
+    font-size: 1.5rem;
+    border-left: 5px solid var(--blue-primary);
+    padding-left: 15px;
+}
+
+.payment-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+.pay-btn {
+    height: 150px;
+    border: 2px solid #e2e8f0;
+    border-radius: 15px;
+    background: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    font-size: 1.4rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.pay-btn i { font-size: 3rem; }
+.pay-btn:hover { border-color: var(--blue-primary); background: #f0f7ff; }
+
+/* 現金支払い計算エリア */
+.cash-calc-container {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.cash-display-area {
+    background: #f8fafc;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.input-line, .change-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    font-size: 1.2rem;
+}
+
+.cash-input-window, .change-window {
+    font-size: 2rem;
+    font-weight: 900;
+}
+
+.cash-footer-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.action-btn {
+    flex: 1;
+    padding: 20px;
+    border-radius: 10px;
+    border: none;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.action-btn.back { background: #94a3b8; color: white; }
+.action-btn.finish { background: var(--success); color: white; }
+.action-btn.disabled { opacity: 0.5; cursor: not-allowed; }
