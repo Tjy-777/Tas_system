@@ -32,34 +32,6 @@
         </div>
     </div>
 
-    <script>
-        const btnLogin = document.getElementById('btn-login');
-        const empIdInput = document.getElementById('emp-id');
-
-        // ログイン処理
-        const login = () => {
-            const id = empIdInput.value || "12345";
-            // 担当者IDをブラウザに保存
-            localStorage.setItem('pos_clerk_id', id);
-            // レジ画面へ遷移
-            window.location.href = 'Tas.html';
-        };
-
-        btnLogin.addEventListener('click', login);
-
-        // Enterキーでログイン
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                login();
-            }
-        });
-
-        // 全角数字を半角に変換する簡易処理（元のロジックを継承）
-        empIdInput.addEventListener('blur', () => {
-            let val = empIdInput.value;
-            val = val.replace(/[Ａ-Ｚａ-ｚ０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0));
-            empIdInput.value = val.replace(/[^a-zA-Z0-9]/g, '');
-        });
-    </script>
+    <script src="js/login.js"></script>
 </body>
 </html>
