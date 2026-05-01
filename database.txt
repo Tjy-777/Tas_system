@@ -1,0 +1,42 @@
+-- 1. データベース（箱）の作成
+CREATE DATABASE IF NOT EXISTS tas_system;
+USE tas_system;
+
+-- 2. 商品テーブル (Items)
+CREATE TABLE items (
+    item_id INT AUTO_INCREMENT PRIMARY KEY,
+    item_name VARCHAR(255) NOT NULL,
+    barcode VARCHAR(100) DEFAULT NULL,
+    price INT NOT NULL,
+    tax_rate DECIMAL(3,2) NOT NULL,
+    category VARCHAR(100),
+    stock_quantity INT NOT NULL DEFAULT 0
+);
+
+-- 3. 会計テーブル (Sales)
+CREATE TABLE sales (
+    sale_id INT AUTO_INCREMENT PRIMARY KEY,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    payment_method VARCHAR(50) NOT NULL, -- 現金、バーコード決済、クレカ、電子マネー
+    total_amount INT NOT NULL
+);
+
+-- 4. 会計明細テーブル (Sale_Details)
+CREATE TABLE sale_details (
+    detail_id INT AUTO_INCREMENT PRIMARY KEY,
+    sale_id INT NOT NULL,
+    item_id INT NOT NULL,
+    quantity INT NOT NULL,
+    selling_price INT NOT NULL,
+    FOREIGN KEY (sale_id) REFERENCES sales(sale_id),
+    FOREIGN KEY (item_id) REFERENCES items(item_id)
+);
+
+-- 5. 社員テーブル (Staff)
+CREATE TABLE staff (
+    staff_id INT AUTO_INCREMENT PRIMARY KEY,
+    staff_number VARCHAR(50) UNIQUE NOT NULL,
+    staff_name VARCHAR(100),
+    password_hash VARCHAR(255) NOT NULL
+);
+データベースを作るための、SQL文
