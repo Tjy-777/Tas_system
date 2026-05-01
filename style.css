@@ -176,3 +176,79 @@ body { font-family: sans-serif; height: 100vh; overflow: hidden; }
     padding: 5px 10px;
     cursor: pointer;
 }
+
+/* --- checkout.html 用の追加スタイル --- */
+
+/* 左側のレシートアイテムの体裁を整える */
+.checkout-receipt-pane .receipt-item {
+    padding: 15px 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.checkout-receipt-pane .receipt-item .top {
+    display: flex;
+    justify-content: space-between;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.checkout-receipt-pane .receipt-item .bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+/* 数量ボタン */
+.qty-btn {
+    width: 32px;
+    height: 32px;
+    border: 1px solid #333;
+    background: #fff;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+/* 現金支払い画面のレイアウト (スクリーンショット再現) */
+.cash-input-container {
+    width: 100%;
+    max-width: 700px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 100px; /* 上下の要素の間隔 */
+}
+
+.change-display {
+    background: #f8fafc;
+    border: 1px solid #333;
+    padding: 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 2.2rem;
+}
+
+.cash-actions {
+    display: flex;
+    gap: 40px;
+    justify-content: center;
+}
+
+.cash-actions .pay-btn {
+    width: 280px;
+    height: 140px;
+    background: #eee;
+    border: 1px solid #333;
+    font-size: 1.6rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    flex-direction: row; /* アイコンを横並びにするなら */
+}
+
+.cash-actions .pay-btn:hover {
+    background: #e2e8f0;
+}

@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>決済 - Tasシステム</title>
-    <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="style.css?v=2">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body class="checkout-body">
 
@@ -20,8 +20,7 @@
     <div class="checkout-container">
         <aside class="checkout-receipt-pane">
             <div class="receipt-header">選択中の商品</div>
-            <div id="checkout-list" class="receipt-list">
-                </div>
+            <div id="checkout-list" class="receipt-list"></div>
             <div class="checkout-total">
                 <span class="total-label">合計：(税込み)</span>
                 <span class="total-amount">¥<span id="checkout-total-val">0</span></span>
@@ -31,7 +30,7 @@
         <main class="payment-methods-pane">
             <h2 class="section-title">お支払方法を選択してください</h2>
             <div class="payment-grid">
-                <button class="pay-btn cash" onclick="finishPayment('現金')">
+                <button class="pay-btn cash" onclick="startCashPayment()">
                     <i class="fa-solid fa-money-bill-1-wave"></i>
                     <span>現 金</span>
                 </button>
@@ -47,6 +46,24 @@
                     <i class="fa-solid fa-id-card"></i>
                     <span>電子マネー</span>
                 </button>
+            </div>
+        </main>
+
+        <main id="cash-payment-pane" class="payment-methods-pane hidden">
+            <h2 class="section-title">現金お支払い</h2>
+            <div class="cash-input-container">
+                <div class="change-display">
+                    <span class="label">残り支払額:</span>
+                    <span class="amount"><span id="remaining-amount">0</span> 円</span>
+                </div>
+                <div class="cash-actions">
+                    <button class="pay-btn back" onclick="showMethods()">
+                        <span>選択画面に戻る</span>
+                    </button>
+                    <button class="pay-btn success" onclick="finishPayment('現金')">
+                        <span>完 了</span>
+                    </button>
+                </div>
             </div>
         </main>
     </div>
@@ -75,22 +92,37 @@
                 const row = document.createElement('div');
                 row.className = 'receipt-item';
                 row.innerHTML = `
-            <div class="top">
-                <span>${item.name}</span>
-                <span>¥${sub.toLocaleString()}</span>
-            </div>
-            <div class="bottom">
-                <span>@${item.price.toLocaleString()}</span>
-                <div class="qty-control">
-                    <button class="qty-btn" onclick="changeQty(${index}, -1)">-</button>
-                    <span>${item.qty}</span>
-                    <button class="qty-btn" onclick="changeQty(${index}, 1)">+</button>
-                </div>
-            </div>`;
+                    <div class="top">
+                        <span>${item.name}</span>
+                        <span>¥${sub.toLocaleString()}</span>
+                    </div>
+                    <div class="bottom">
+                        <span>@${item.price.toLocaleString()}</span>
+                        <div class="qty-control">
+                            <button class="qty-btn" onclick="changeQty(${index}, -1)">-</button>
+                            <span>${item.qty}</span>
+                            <button class="qty-btn" onclick="changeQty(${index}, 1)">+</button>
+                        </div>
+                    </div>`;
                 list.appendChild(row);
             });
             totalDisp.textContent = total.toLocaleString();
         }
+
+        // 画面切り替え：お支払い方法選択 → 現金入力画面
+        window.startCashPayment = () => {
+            document.querySelector('.payment-methods-pane:not(#cash-payment-pane)').classList.add('hidden');
+            document.getElementById('cash-payment-pane').classList.remove('hidden');
+            // 合計金額を「残り支払額」に反映
+            document.getElementById('remaining-amount').textContent = 
+                document.getElementById('checkout-total-val').textContent;
+        };
+
+        // 画面切り替え：現金入力画面 → お支払い方法選択
+        window.showMethods = () => {
+            document.getElementById('cash-payment-pane').classList.add('hidden');
+            document.querySelector('.payment-methods-pane:not(#cash-payment-pane)').classList.remove('hidden');
+        };
 
         // 数量変更
         window.changeQty = (index, delta) => {
@@ -100,6 +132,11 @@
             }
             sessionStorage.setItem('current_cart', JSON.stringify(checkoutCart));
             updateCheckoutUI();
+            
+            // 現金画面表示中に数量が変わった場合、残り支払額も更新
+            const remaining = document.getElementById('remaining-amount');
+            if (remaining) remaining.textContent = document.getElementById('checkout-total-val').textContent;
+
             if (checkoutCart.length === 0) location.href = 'Tas.html';
         };
 
