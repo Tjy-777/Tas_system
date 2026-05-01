@@ -1,7 +1,7 @@
 <?php
 // db.php
 $host = 'localhost';
-$dbname = 'pos_db'; // 作成したデータベース名
+$dbname = 'tas_register'; // 作成したデータベース名
 $user = 'root';     // MySQLのユーザー名 (XAMPPの初期値はroot)
 $pass = '';         // MySQLのパスワード (XAMPPの初期値は空)
 
