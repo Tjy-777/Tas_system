@@ -1,26 +1,33 @@
 <?php
-// api_products.php
+// api_products.php (商品データ取得用)
 header('Content-Type: application/json; charset=utf-8');
-require_once dirname(__FILE__) . '/db.php';
+require_once 'db.php';
 
 try {
-    $stmt = $pdo->query("SELECT * FROM products");
-    $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    
-    // JSで扱いやすいように item_code をキーにした連想配列に変換する
-    $result = [];
-    foreach ($products as $row) {
-        $result[$row['item_code']] = [
-            'name' => $row['name'],
-            'kana' => $row['kana'],
-            'price' => (int)$row['price'],
-            'category' => $row['category']
+    // itemsテーブルから全ての商品を取得
+    $stmt = $pdo->query("SELECT * FROM items");
+    $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $products = [];
+    foreach ($items as $item) {
+        // JavaScript側で扱いやすいように、キーを「item_id」にします
+        // （もしレジのコード入力で barcode を使う場合は、ここを $item['barcode'] にしてください）
+        $code = $item['item_id']; 
+        
+        $products[$code] = [
+            'name' => $item['item_name'],      // JSの .name に対応
+            'price' => (int)$item['price'],    // JSの .price に対応
+            'category' => $item['category'],   // JSの .category に対応
+            'barcode' => $item['barcode'],
+            'tax_rate' => (float)$item['tax_rate'],
+            'stock' => (int)$item['stock_quantity']
         ];
     }
-    
-    echo json_encode($result, JSON_UNESCAPED_UNICODE);
+
+    // JSON形式でJavaScriptに返す
+    echo json_encode($products, JSON_UNESCAPED_UNICODE);
+
 } catch (PDOException $e) {
     http_response_code(500);
-    echo json_encode(['error' => $e->getMessage()]);
+    echo json_encode(['error' => 'DBエラーが発生しました: ' . $e->getMessage()]);
 }
-?>

@@ -1,41 +1,50 @@
-// js/login.js
-
+// js/login.js 決定版
 const btnLogin = document.getElementById('btn-login');
 const empIdInput = document.getElementById('emp-id');
+const empPassInput = document.getElementById('emp-pass');
 
-/**
- * ログイン処理
- */
-const login = () => {
-    // 未入力ならデフォルトID "12345"
-    const id = empIdInput.value || "12345";
+const login = async () => {
+    const id = empIdInput.value;
+    const pass = empPassInput.value;
+
+    if (!id || !pass) {
+        alert("社員番号とパスワードを入力して下さい");
+        return;
+    }
     
-    // 担当者IDを保存
-    localStorage.setItem('pos_clerk_id', id);
-    
-    // メイン画面へ遷移
-    window.location.href = 'Tas.html';
+    try {
+        // ↓ここを 'php/api_products.php' に変更します
+        const response = await fetch('php/api_login.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json'},
+            body: JSON.stringify({staff_id: id, password: pass })
+        });
+
+        // サーバーから返ってきた生データをテキストとして一度取得
+        const responseText = await response.text();
+        
+        try {
+            // テキストをJSONとして解析
+            const result = JSON.parse(responseText);
+
+            if (result.success) {
+                localStorage.setItem('pos_clerk_id', id);
+                localStorage.setItem('pos_clerk_name', result.staff_name);
+                window.location.href = 'Tas.html';
+            } else {
+                alert(result.message);
+            }
+        } catch (jsonError) {
+            // JSON解析に失敗した場合（PHPがエラー文を返している場合）
+            console.error("サーバーからの応答が不正です:", responseText);
+            alert("サーバー内部でエラーが起きています。F12キーのコンソールを確認してください。");
+        }
+
+    } catch (error) {
+        console.error("通信エラーの詳細:", error);
+        alert("サーバーに接続できませんでした。");
+    }
 };
 
-// クリックイベント
-if (btnLogin) {
-    btnLogin.addEventListener('click', login);
-}
-
-// Enterキーでのログイン対応
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-        login();
-    }
-});
-
-// 全角数字を半角に変換する処理（入力ミス防止）
-if (empIdInput) {
-    empIdInput.addEventListener('blur', () => {
-        let val = empIdInput.value;
-        val = val.replace(/[Ａ-Ｚａ-ｚ０-９]/g, s => 
-            String.fromCharCode(s.charCodeAt(0) - 0xFEE0)
-        );
-        empIdInput.value = val;
-    });
-}
+if (btnLogin) btnLogin.addEventListener('click', login);
+document.addEventListener('keydown', (e) => { if (e.key === 'Enter') login(); });
