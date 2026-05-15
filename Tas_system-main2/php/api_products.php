@@ -10,9 +10,9 @@ try {
 
     $products = [];
     foreach ($items as $item) {
-        // JavaScript側で扱いやすいように、キーを「item_id」にします
-        // （もしレジのコード入力で barcode を使う場合は、ここを $item['barcode'] にしてください）
-        $code = $item['item_id']; 
+        // ★ここを変更しました！
+        // JavaScript側でキーとして扱う値を「barcode」にします
+        $code = $item['barcode']; 
         
         $products[$code] = [
             'name' => $item['item_name'],      // JSの .name に対応

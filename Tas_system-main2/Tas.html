@@ -51,11 +51,18 @@
                         <div class="calculator-container">
                             <div class="calc-display" id="calc-display"></div>
                             <div class="numpad">
-                                <button class="num">7</button><button class="num">8</button><button class="num">9</button>
-                                <button class="num">4</button><button class="num">5</button><button class="num">6</button>
-                                <button class="num">1</button><button class="num">2</button><button class="num">3</button>
-                                <button class="num">0</button><button class="num">00</button><button id="btn-calc-del">削除</button>
-                                <button id="btn-calc-enter" class="calc-enter">入力 / 確定</button>
+                                <button type="button" class="num">7</button>
+                                <button type="button" class="num">8</button>
+                                <button type="button" class="num">9</button>
+                                <button type="button" class="num">4</button>
+                                <button type="button" class="num">5</button>
+                                <button type="button" class="num">6</button>
+                                <button type="button" class="num">1</button>
+                                <button type="button" class="num">2</button><button class="num">3</button>
+                                <button type="button" class="num">0</button>
+                                <button type="button" class="num">00</button>
+                                <button type="button" id="btn-calc-del">削除</button>
+                                <button type="button" id="btn-calc-enter" class="calc-enter">入力 / 確定</button>
                             </div>
                         </div>
                     </div>
@@ -64,7 +71,7 @@
                 <div class="bottom-actions">
                     <button id="btn-clear-all" class="danger">全消去</button>
                     <button id="btn-checkout" class="success">会 計</button>
-                    <button onclick="location.href='index.html'" style="background:var(--navy-dark); color:white; border:none; border-radius:12px; cursor:pointer;">終了</button>
+                    <button onclick="handleLogout()" style="background:var(--navy-dark); color:white; border:none; border-radius:12px; cursor:pointer;">ログアウト</button>
                 </div>
             </main>
         </div>
