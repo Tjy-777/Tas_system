@@ -1,25 +1,17 @@
 // js/checkout.js
 
-// データの読み込み
 const checkoutCart = JSON.parse(sessionStorage.getItem('current_cart') || "[]");
-let cashInput = ""; // 入力されたお預かり金額
-let totalAmount = 0; // 合計金額
-let changeAmount = 0; // 計算されたお釣り
+let cashInput = ""; 
+let totalAmount = 0;
+let changeAmount = 0; 
 
-/**
- * 初期化処理
- */
 const init = () => {
     const clerk = localStorage.getItem('pos_clerk_id') || "----";
     const label = document.getElementById('clerk-label-checkout');
     if (label) label.textContent = `担当: ${clerk}`;
-
     updateCheckoutUI();
 };
 
-/**
- * 商品一覧と合計金額の表示更新
- */
 const updateCheckoutUI = () => {
     const list = document.getElementById('checkout-list');
     const totalDisp = document.getElementById('checkout-total-val');
@@ -42,74 +34,83 @@ const updateCheckoutUI = () => {
 };
 
 /**
- * 【現金以外の決済】以前と同じように即座に完了させる
- * （HTML側の onclick="finishPayment(...)" に名前を合わせました）
+ * ★共通機能：売上をDBに送信する
  */
-window.finishPayment = (methodName) => {
-    alert(`${methodName}でお会計が完了しました。`);
-    
-    // カートを空にしてメイン画面へ
-    sessionStorage.removeItem('current_cart');
-    location.href = 'Tas.html';
+const saveSaleToDB = async (methodName) => {
+    const payload = {
+        payment_method: methodName,
+        total_amount: totalAmount,
+        cart: checkoutCart
+    };
+
+    try {
+        const response = await fetch('php/record_sale.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const result = await response.json();
+        return result.success;
+    } catch (e) {
+        console.error("DB保存エラー:", e);
+        return false;
+    }
 };
 
 /**
- * 【現金決済】画面切り替えとテンキー処理
+ * 現金以外の決済 (DB保存を追加)
  */
-window.startCashPayment = () => {
-    // 支払い方法選択を隠し、現金入力画面を出す
-    const mainPane = document.querySelector('.payment-methods-pane:not(#cash-payment-pane)');
-    const cashPane = document.getElementById('cash-payment-pane');
-    if (mainPane) mainPane.classList.add('hidden');
-    if (cashPane) cashPane.classList.remove('hidden');
-    window.pressClear(); // 金額をリセット
+window.finishPayment = async (methodName) => {
+    const success = await saveSaleToDB(methodName);
+    if (success) {
+        alert(`${methodName}でお会計が完了しました。`);
+        sessionStorage.removeItem('current_cart');
+        location.href = 'Tas.html';
+    } else {
+        alert("売上データの保存に失敗しました。");
+    }
 };
 
-window.showMethods = () => {
-    // 現金画面を隠し、選択画面に戻す
-    const cashPane = document.getElementById('cash-payment-pane');
-    const mainPane = document.querySelector('.payment-methods-pane:not(#cash-payment-pane)');
-    if (cashPane) cashPane.classList.add('hidden');
-    if (mainPane) mainPane.classList.remove('hidden');
+/**
+ * 現金決済完了 (DB保存を追加)
+ */
+window.finishCashPayment = async () => {
+    const success = await saveSaleToDB('現金');
+    if (success) {
+        alert(`お会計完了\nお預かり：¥${Number(cashInput).toLocaleString()}\nお釣り：¥${changeAmount.toLocaleString()}`);
+        sessionStorage.removeItem('current_cart');
+        location.href = 'Tas.html';
+    } else {
+        alert("売上データの保存に失敗しました。");
+    }
 };
 
-// テンキー入力
+// テンキー入力などの関数
 window.pressNum = (num) => {
     if (cashInput.length >= 8) return;
     cashInput += num;
     updateCashDisplay();
 };
 
-// 消去ボタン
 window.pressClear = () => {
     cashInput = "";
     updateCashDisplay();
 };
 
-/**
- * お預かり金額とお釣りの表示更新
- */
 const updateCashDisplay = () => {
-    // ★HTML側の id="cash-val" に名前を合わせました
     const paidDisp = document.getElementById('cash-val');
     const changeDisp = document.getElementById('change-val');
     const finishBtn = document.getElementById('btn-finish-cash');
 
-    // 1. お預かり金額の表示を更新
     if (paidDisp) {
-        const displayVal = cashInput === "" ? "0" : Number(cashInput).toLocaleString();
-        paidDisp.textContent = displayVal;
+        paidDisp.textContent = cashInput === "" ? "0" : Number(cashInput).toLocaleString();
     }
 
-    // 2. お釣りの計算
     const paidNum = Number(cashInput);
     changeAmount = paidNum - totalAmount;
 
-    // 3. お釣りの表示とボタンの活性化
     if (changeDisp) {
         changeDisp.textContent = changeAmount.toLocaleString();
-        
-        // 足りている場合
         if (changeAmount >= 0 && cashInput !== "") {
             changeDisp.style.color = "#1e293b";
             if (finishBtn) {
@@ -117,7 +118,6 @@ const updateCashDisplay = () => {
                 finishBtn.classList.remove('disabled');
             }
         } else {
-            // 足りない場合
             changeDisp.style.color = "red";
             if (finishBtn) {
                 finishBtn.disabled = true;
@@ -127,16 +127,19 @@ const updateCashDisplay = () => {
     }
 };
 
-/**
- * 現金決済完了
- */
-window.finishCashPayment = () => {
-    const paid = Number(cashInput);
-    alert(`お会計完了\nお預かり：¥${paid.toLocaleString()}\nお釣り：¥${changeAmount.toLocaleString()}`);
-    
-    sessionStorage.removeItem('current_cart');
-    location.href = 'Tas.html';
+window.startCashPayment = () => {
+    const mainPane = document.querySelector('.payment-methods-pane:not(#cash-payment-pane)');
+    const cashPane = document.getElementById('cash-payment-pane');
+    if (mainPane) mainPane.classList.add('hidden');
+    if (cashPane) cashPane.classList.remove('hidden');
+    window.pressClear();
 };
 
-// 起動
+window.showMethods = () => {
+    const cashPane = document.getElementById('cash-payment-pane');
+    const mainPane = document.querySelector('.payment-methods-pane:not(#cash-payment-pane)');
+    if (cashPane) cashPane.classList.add('hidden');
+    if (mainPane) mainPane.classList.remove('hidden');
+};
+
 document.addEventListener('DOMContentLoaded', init);

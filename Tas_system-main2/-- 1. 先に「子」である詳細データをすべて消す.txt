@@ -1,0 +1,9 @@
+-- 1. 先に「子」である詳細データをすべて消す
+DELETE FROM sale_details;
+
+-- 2. 次に「親」である売上データをすべて消す
+DELETE FROM sales;
+
+-- 3. (おまけ) 次回1番から始まるように番号をリセットする
+ALTER TABLE sales AUTO_INCREMENT = 1;
+ALTER TABLE sale_details AUTO_INCREMENT = 1;
